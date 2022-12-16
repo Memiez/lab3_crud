@@ -1,8 +1,75 @@
 <script setup lang="ts">
-import { reactive } from "vue";
+import { ref, reactive, watch } from "vue";
 const person = reactive({ name: "", surname: "", gender: "" });
-function dosubmit() {
-  console.log(person);
+const msg = reactive({ name: "", surname: "", gender: "" });
+
+const checkName = function (name: string) {
+  if (name.trim().length == 0) {
+    msg.name = "First name is empty !";
+    return false;
+  }
+  msg.name = "";
+  return true;
+};
+
+const checkSurname = (surname: string) => {
+  if (surname.trim().length == 0) {
+    msg.surname = "Surname is empty !";
+    return false;
+  }
+  msg.surname = "";
+  return true;
+};
+
+function checkGender(gender: string) {
+  if (gender.trim().length == 0) {
+    msg.gender = "Please choose your gender.";
+    return false;
+  }
+
+  msg.gender = "";
+  return true;
+}
+
+const clearForm = function () {
+  person.name = "";
+  person.surname = "";
+  person.gender = "";
+  msg.name = "";
+  msg.surname = "";
+  msg.gender = "";
+};
+
+watch(
+  () => person.name,
+  (name) => {
+    checkName(name);
+  }
+);
+
+watch(
+  () => person.surname,
+  (surname) => {
+    checkSurname(surname);
+  }
+);
+
+watch(
+  () => person.gender,
+  (gender) => {
+    checkGender(gender);
+  }
+);
+
+function doSubmit() {
+  if (
+    checkName(person.name) &&
+    checkSurname(person.surname) &&
+    checkGender(person.gender)
+  ) {
+    console.log(person);
+    clearForm();
+  }
 }
 </script>
 <template>
@@ -10,6 +77,8 @@ function dosubmit() {
     <form>
       <label for="name">First Name</label>
       <input type="text" id="name" v-model="person.name" autocomplete="off" />
+      <span class="error">{{ msg.name }}</span>
+
       <label for="surname">Surname</label>
       <input
         type="text"
@@ -17,6 +86,7 @@ function dosubmit() {
         v-model="person.surname"
         autocomplete="off"
       />
+      <span class="error">{{ msg.surname }}</span>
 
       <label for="gender">Gender</label>
       <select id="gender" v-model="person.gender">
@@ -24,7 +94,8 @@ function dosubmit() {
         <option value="M">Male</option>
         <option value="F">Female</option>
       </select>
-      <input type="submit" value="Submit" @click.prevent="dosubmit" />
+      <span class="error">{{ msg.gender }}</span>
+      <input type="submit" value="Submit" @click.prevent="doSubmit" />
     </form>
     <pre>{{ person }}</pre>
   </div>
@@ -61,5 +132,11 @@ div {
   border-radius: 5px;
   background-color: #f2f2f2;
   padding: 20px;
+}
+
+.error {
+  color: red;
+  font-size: smaller;
+  display: block;
 }
 </style>
