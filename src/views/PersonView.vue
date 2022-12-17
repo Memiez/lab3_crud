@@ -1,8 +1,22 @@
 <script setup lang="ts">
-import { ref, reactive, watch } from "vue";
-const person = reactive({ name: "", surname: "", gender: "" });
+import { ref, reactive, watch, nextTick } from "vue";
+class Person {
+  id: number;
+  name: string;
+  surname: string;
+  gender: string;
+  static lastId = 1;
+  constructor(name: string, surname: string, gender: string) {
+    this.id = Person.lastId++;
+    this.name = name;
+    this.surname = surname;
+    this.gender = gender;
+  }
+}
+const person = reactive<Person>({ id: -1, name: "", surname: "", gender: "" });
 const msg = reactive({ name: "", surname: "", gender: "" });
-
+const personList = ref<Person[]>([]); //Array
+const showForm = ref(false);
 const checkName = function (name: string) {
   if (name.trim().length == 0) {
     msg.name = "First name is empty !";
@@ -35,9 +49,12 @@ const clearForm = function () {
   person.name = "";
   person.surname = "";
   person.gender = "";
-  msg.name = "";
-  msg.surname = "";
-  msg.gender = "";
+
+  nextTick(() => {
+    msg.name = "";
+    msg.surname = "";
+    msg.gender = "";
+  });
 };
 
 watch(
@@ -67,13 +84,15 @@ function doSubmit() {
     checkSurname(person.surname) &&
     checkGender(person.gender)
   ) {
-    console.log(person);
+    const p = new Person(person.name, person.surname, person.gender);
+    personList.value.push(p); //push to array
+    console.log(personList.value);
     clearForm();
   }
 }
 </script>
 <template>
-  <div>
+  <div v-if="showForm">
     <form>
       <label for="name">First Name</label>
       <input type="text" id="name" v-model="person.name" autocomplete="off" />
@@ -97,7 +116,34 @@ function doSubmit() {
       <span class="error">{{ msg.gender }}</span>
       <input type="submit" value="Submit" @click.prevent="doSubmit" />
     </form>
-    <pre>{{ person }}</pre>
+  </div>
+  <div v-if="!showForm">
+    <div style="width: 100%; text-align: right">
+      <button style="width: 100px">Add</button>
+    </div>
+    <table id="persons">
+      <thead>
+        <th>ID</th>
+        <th>First Name</th>
+        <th>Surname</th>
+        <th>Gender</th>
+      </thead>
+      <tr v-for="(item, index) in personList" :key="index">
+        <td>{{ item.id }}</td>
+        <td>{{ item.name }}</td>
+        <td>{{ item.surname }}</td>
+        <td>{{ item.gender }}</td>
+      </tr>
+      <tr>
+        <td
+          colspan="4"
+          style="text-align: center"
+          v-if="personList.length === 0"
+        >
+          No Data
+        </td>
+      </tr>
+    </table>
   </div>
 </template>
 
@@ -113,9 +159,10 @@ select {
   box-sizing: border-box;
 }
 
-input[type="submit"] {
+input[type="submit"],
+button {
   width: 100%;
-  background-color: #cd51ac;
+  background-color: #c75ab0;
   color: white;
   padding: 14px 20px;
   margin: 8px 0;
@@ -125,7 +172,7 @@ input[type="submit"] {
 }
 
 input[type="submit"]:hover {
-  background-color: #cd51ac;
+  background-color: #d46bb8;
 }
 
 div {
@@ -138,5 +185,33 @@ div {
   color: red;
   font-size: smaller;
   display: block;
+}
+
+#persons {
+  font-family: Arial, Helvetica, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+#persons td,
+#persons th {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+#persons tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+#persons tr:hover {
+  background-color: #ddd;
+}
+
+#persons th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: left;
+  background-color: #04aa6d;
+  color: white;
 }
 </style>
