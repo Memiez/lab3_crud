@@ -88,6 +88,7 @@ function doSubmit() {
     personList.value.push(p); //push to array
     console.log(personList.value);
     clearForm();
+    showForm.value = false;
   }
 }
 </script>
@@ -119,7 +120,7 @@ function doSubmit() {
   </div>
   <div v-if="!showForm">
     <div style="width: 100%; text-align: right">
-      <button style="width: 100px">Add</button>
+      <button style="width: 100px" @click="showForm = !showForm">Add</button>
     </div>
     <table id="persons">
       <thead>
@@ -127,12 +128,21 @@ function doSubmit() {
         <th>First Name</th>
         <th>Surname</th>
         <th>Gender</th>
+        <th style="width: 250px">Operation</th>
       </thead>
       <tr v-for="(item, index) in personList" :key="index">
         <td>{{ item.id }}</td>
         <td>{{ item.name }}</td>
         <td>{{ item.surname }}</td>
         <td>{{ item.gender }}</td>
+        <td>
+          <button style="width: 100px; background-color: darkcyan">Edit</button
+          ><button
+            style="width: 100px; margin-left: 1em; background-color: red"
+          >
+            Delete
+          </button>
+        </td>
       </tr>
       <tr>
         <td
@@ -162,7 +172,7 @@ select {
 input[type="submit"],
 button {
   width: 100%;
-  background-color: #c75ab0;
+  background-color: #0787f7;
   color: white;
   padding: 14px 20px;
   margin: 8px 0;
@@ -172,7 +182,7 @@ button {
 }
 
 input[type="submit"]:hover {
-  background-color: #d46bb8;
+  background-color: #0787f7;
 }
 
 div {
