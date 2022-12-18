@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { isTemplateElement } from "@babel/types";
 import { ref, reactive, watch, nextTick } from "vue";
 class Person {
   id: number;
@@ -84,13 +85,29 @@ function doSubmit() {
     checkSurname(person.surname) &&
     checkGender(person.gender)
   ) {
-    const p = new Person(person.name, person.surname, person.gender);
-    personList.value.push(p); //push to array
-    console.log(personList.value);
+    if (person.id < 0) {
+      // Add new
+      const p = new Person(person.name, person.surname, person.gender);
+      personList.value.push(p); //push to array
+    } else {
+      // Edit
+      const index = personList.value.findIndex((item) => item.id === person.id);
+      personList.value[index].name = person.name;
+      personList.value[index].surname = person.surname;
+      personList.value[index].gender = person.gender;
+    }
+
     clearForm();
     showForm.value = false;
   }
 }
+const doEdit = function (p: Person) {
+  person.name = p.name;
+  person.surname = p.surname;
+  person.gender = p.gender;
+  person.id = p.id;
+  showForm.value = true;
+};
 </script>
 <template>
   <div v-if="showForm">
@@ -136,7 +153,11 @@ function doSubmit() {
         <td>{{ item.surname }}</td>
         <td>{{ item.gender }}</td>
         <td>
-          <button style="width: 100px; background-color: darkcyan">Edit</button
+          <button
+            style="width: 100px; background-color: darkcyan"
+            @click="doEdit(item)"
+          >
+            Edit</button
           ><button
             style="width: 100px; margin-left: 1em; background-color: red"
           >
