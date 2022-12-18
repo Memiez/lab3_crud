@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { isTemplateElement } from "@babel/types";
 import { ref, reactive, watch, nextTick } from "vue";
 class Person {
   id: number;
@@ -18,6 +17,7 @@ const person = reactive<Person>({ id: -1, name: "", surname: "", gender: "" });
 const msg = reactive({ name: "", surname: "", gender: "" });
 const personList = ref<Person[]>([]); //Array
 const showForm = ref(false);
+
 const checkName = function (name: string) {
   if (name.trim().length == 0) {
     msg.name = "First name is empty !";
@@ -50,6 +50,8 @@ const clearForm = function () {
   person.name = "";
   person.surname = "";
   person.gender = "";
+  person.id = -1;
+  //Update
 
   nextTick(() => {
     msg.name = "";
@@ -108,9 +110,14 @@ const doEdit = function (p: Person) {
   person.id = p.id;
   showForm.value = true;
 };
+const doDelete = function (p: Person) {
+  const index = personList.value.findIndex((item) => item.id === person.id);
+  personList.value.splice(index, 1);
+};
 </script>
 <template>
-  <div v-if="showForm">
+  <h2>Person</h2>
+  <div v-if="showForm" class="form">
     <form>
       <label for="name">First Name</label>
       <input type="text" id="name" v-model="person.name" autocomplete="off" />
@@ -160,6 +167,7 @@ const doEdit = function (p: Person) {
             Edit</button
           ><button
             style="width: 100px; margin-left: 1em; background-color: red"
+            @click="doDelete(item)"
           >
             Delete
           </button>
@@ -167,7 +175,7 @@ const doEdit = function (p: Person) {
       </tr>
       <tr>
         <td
-          colspan="4"
+          colspan="5"
           style="text-align: center"
           v-if="personList.length === 0"
         >
@@ -206,7 +214,7 @@ input[type="submit"]:hover {
   background-color: #0787f7;
 }
 
-div {
+div.form {
   border-radius: 5px;
   background-color: #f2f2f2;
   padding: 20px;
